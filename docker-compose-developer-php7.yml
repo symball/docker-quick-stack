@@ -1,0 +1,34 @@
+version:           '2'
+services:
+
+  app_environment:
+    env_file: .env
+    build:
+      context: ./docker/php7_developer
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
+    image: symball/pivot88:toolchain_php7
+    links:
+      - mail_server
+
+  app_platform:
+    env_file: .env
+    build:
+      context: docker/app_platform
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
+    image: symball/pivot88:platform_php7
+    links:
+      - mail_server
+
+  database_sql:
+    ports:
+      - 3306:3306
+
+  # Fake SMTP service
+  mail_server:
+    image: mailhog/mailhog
+    ports:
+      - 82:8025

@@ -1,0 +1,129 @@
+version:           '2'
+services:
+  #
+  # BASE ENVIRONMENT
+  #
+  # Define the smallest building blocks to handle intercommunication with
+  # every component with a shell environment and provide a volume layout For
+  # project development
+  #
+  # For the developer, once you have a configuration setup the way you want, you
+  # should stash this file unless told changes are being made.
+  #
+  app_environment:
+    build:
+      context:       ./docker/base_php7
+    image:         base:php7
+    stdin_open:    true
+    tty:           true
+    #
+    # INTERNAL NETWORKING
+    #
+    links:
+      - database_sql
+      - database_couch
+      - message_rabbitmq
+    #
+    # SHARED HOST VOLUMES
+    #
+    volumes:
+      # Log location
+      - ./docker/logs/base_php7:/srv/app/logs
+      # Extra platform Configuration
+      - ./docker/base_php7/php-overrides.ini:/etc/php7/conf.d/overrides.ini
+      # Project files
+      - ./Pivot88WebPlatform:/srv
+      - ./HTML5WebReports:/srv/reports
+      - ./version_info.json:/srv/version_info.json
+      # TODO Once using Symfony translation bundle, remove this
+      - ./PlatformTranslations:/srv/translations
+      #
+      #  --- REQUIRED CHANGES BELOW ---
+      #
+      #  - VCS Access
+      #  Set the first parameter to a path on your system with an SSH config and
+      #  the keys to access the reopositories being used
+      - ./Users/simon/.ssh:/phpseven/.ssh
+
+  #
+  # DAEMON ENVIRONMENT
+  #
+  # A version of the base image running in an automated fashion. Inherits volumes
+  # from the base environment
+  #
+  app_platform:
+    build:
+      context:       ./docker/platform_php7
+    image:         platform:php7
+    volumes_from:
+      - app_environment
+    #
+    # INTERNAL NETWORKING
+    #
+    links:
+      - database_sql
+      - database_couch
+      - message_rabbitmq
+    #
+    # SHARED HOST VOLUMES
+    #
+    volumes:
+      # Extra platform Configuration
+      - ./docker/platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
+  #
+  # INGRESS CONTROLLER
+  #
+  # A gateway container for providing a single point of communication with
+  # external services
+  #
+  external_gateway:
+    image:         nginx:mainline-alpine
+    links:
+      - app_platform
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./docker/nginx/platform_php7_symfony.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/database_couch.conf:/etc/nginx/conf.d/couch.conf
+      - ./docker/logs/nginx:/var/log/nginx
+    volumes_from:
+      - app_platform
+  #
+  # INTERNAL SERVICES
+  #
+  database_sql:
+    image:         mysql/mysql-server:5.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=test
+      - MYSQL_ROOT_HOST=%
+    volumes:
+      - ./docker/data/mysql/db:/var/lib/mysql
+      - ./docker/logs/mysql:/var/log/mysqld.log
+
+  database_couch:
+     image:        couchdb:1
+     # For development acces
+     ports:
+       - 5984:5984
+     volumes:
+       - ./docker/data/couch:/usr/local/var/lib/couchdb
+     # TODO substitute with key service
+     environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=admin
+
+  message_rabbitmq:
+     image: rabbitmq:3-alpine
+     ports:
+      - 5672:5672
+      - 15672:15672
+
+  log_elk:
+     image: sebp/elk:550
+     ports:
+      - 81:80
+     volumes:
+      - ./docker/elk/logstash:/etc/logstash
+      - ./docker/elk/logstash/patterns:/opt/logstash/patterns
+      - ./docker/logs:/internal_logs

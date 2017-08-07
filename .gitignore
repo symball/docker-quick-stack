@@ -1,0 +1,6 @@
+.env
+**/.directory
+.directory
+/docker/data
+**/*~
+*~
