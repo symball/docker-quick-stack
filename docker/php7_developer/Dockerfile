@@ -1,5 +1,10 @@
 FROM alpine:3.5
-MAINTAINER Simon Ball <simon.ball@pivot88.com>
+MAINTAINER Simon Ball <open-source@simonball.me>
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+USER root
 
 RUN apk --update add \
   php7 \
@@ -39,10 +44,8 @@ RUN apk --update add \
   nodejs \
   openssh \
   && ssh-keygen -A \
-  && rm -rf /var/cache/apk/*
-
-# Symlink PHP7 to be runnable as php as opposed to needing to use php7
-RUN ln -s /usr/bin/php7 /usr/bin/php
+  && rm -rf /var/cache/apk/* \
+  && ln -s /usr/bin/php7 /usr/bin/php
 
 # Enable xDebug
 RUN echo "zend_extension=xdebug.so" > /etc/php7/conf.d/xdebug.ini
@@ -53,13 +56,13 @@ RUN curl -sS https://getcomposer.org/installer | \
   composer --version
 
 # Copy across some of the utilities
-COPY pdepend /usr/local/bin/pdepend
-COPY phing /usr/local/bin/phing
-COPY phpcpd /usr/local/bin/phpcpd
-COPY phpdox /usr/local/bin/phpdox
-COPY phploc /usr/local/bin/phploc
-COPY phpmd /usr/local/bin/phpmd
-COPY phpunit /usr/local/bin/phpunit
+COPY tools/pdepend /usr/local/bin/pdepend
+COPY tools/phing /usr/local/bin/phing
+COPY tools/phpcpd /usr/local/bin/phpcpd
+COPY tools/phpdox /usr/local/bin/phpdox
+COPY tools/phploc /usr/local/bin/phploc
+COPY tools/phpmd /usr/local/bin/phpmd
+COPY tools/phpunit /usr/local/bin/phpunit
 
 # Output the versions os the above utilities
 RUN pdepend --version && \
@@ -71,8 +74,16 @@ RUN pdepend --version && \
  phpunit --version
 
 # GulpJS task runner
-RUN npm install gulp -g && gulp -v
-# bower package manager
-RUN npm install bower -g && bower -v
+RUN npm i -g gulp bower && gulp -v && bower -v
+
+# Prepare a user and workspace
+RUN mkdir -p /srv \
+  && addgroup -g $GROUP_ID platform \
+  && adduser -D -h /srv -s /usr/bin/bash -G platform -u $USER_ID developer \
+  && chmod -R 775 /srv \
+  && chown -R developer:platform /srv
+
+USER developer
+WORKDIR /srv
 
 CMD ["/bin/bash"]
