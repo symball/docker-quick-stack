@@ -1,18 +1,62 @@
-FROM symball/pivot88:platform_php7
+FROM alpine:3.5
+MAINTAINER Simon Ball <open-source@simonball.me>
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
 USER root
 
-# Prepare a user and workspace
-RUN mkdir -p /srv
-RUN addgroup -g $GROUP_ID www-data
-RUN adduser -D -h /srv -s /usr/bin/bash -G www-data -u $USER_ID www-data
-RUN chmod -R 775 /srv
-RUN chown -R www-data:www-data /srv
+RUN apk --update add \
+  php7 \
+  php7-bcmath \
+  php7-dom \
+  php7-ctype \
+  php7-curl \
+  php7-fpm \
+  php7-gd \
+  php7-gettext \
+  php7-iconv \
+  php7-intl \
+  php7-json \
+  php7-ldap \
+  php7-mbstring \
+  php7-mcrypt \
+  php7-mysqlnd \
+  php7-opcache \
+  php7-openssl \
+  php7-pdo \
+  php7-pdo_mysql \
+  php7-pdo_sqlite \
+  php7-phar \
+  php7-posix \
+  php7-session \
+  php7-soap \
+  php7-xdebug \
+  php7-xml \
+  php7-zip \
+  php7-zlib \
+  # Command line tools
+  autoconf \
+  bash \
+  ca-certificates \
+  curl \
+  git \
+  libsasl \
+  openssh \
+  && ssh-keygen -A \
+  && rm -rf /var/cache/apk/* \
+  && ln -s /usr/bin/php7 /usr/bin/php
 
-USER www-data
+# Prepare a user and workspace
+RUN mkdir -p /srv \
+  && addgroup -g $GROUP_ID platform \
+  && adduser -D -h /home/phpdaemon -s /usr/bin/bash -G platform -u $USER_ID phpdaemon \
+  && chmod -R 775 /srv \
+  && chown -R phpdaemon:platform /srv \
+  && mkdir -p /var/log/php7 \
+  && chown -R phpdaemon:platform /var/log
+
+USER phpdaemon
 WORKDIR /srv
 
 CMD ["php-fpm7", "-F"]

@@ -58,12 +58,12 @@ echo "### Building Docker files. This may take some time ###"
 echo "######################################################"
 
 # TODO Introduce various configs
-docker-compose build -f docker-compose.yml
+docker-compose build -f docker-compose.yml -f docker-compose-developer.yml
 
 echo "######################################"
 echo "### Starting up Docker environment ###"
 echo "######################################"
-docker-compose up -d
+docker-compose up -d -f docker-compose.yml -f docker-compose-developer.yml
 
 # Wait until docker is available
 until docker exec -t webenvironment_app_environment_1 ls -la > /dev/null 2>&1; do sleep 2; done

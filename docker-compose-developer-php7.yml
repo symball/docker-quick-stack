@@ -2,12 +2,12 @@ version:           '2'
 services:
 
   app_environment:
-    image: developer:php7
+    image: base:php7_developer
     stdin_open:    true
     tty:           true
     env_file: .env
     build:
-      context: ./docker/developer_php7
+      context: ./docker/base_php7_developer
       args:
         - USER_ID=${USER_ID}
         - GROUP_ID=${GROUP_ID}
@@ -18,38 +18,30 @@ services:
       - database_sql
       - database_couch
       - message_rabbitmq
+      - mail_server
     #
     # SHARED HOST VOLUMES
     #
     volumes:
       # Log location
-      - ./docker/logs/base_php7:/srv/app/logs
+      - ./docker/log/base_symfony_php7:/srv/app/logs
       # Extra platform Configuration
       - ./docker/base_php7/php-overrides.ini:/etc/php7/conf.d/overrides.ini
       # Project files
-      - ./Pivot88WebPlatform:/srv
-      - ./HTML5WebReports:/srv/reports
-      - ./version_info.json:/srv/version_info.json
-      # TODO Once using Symfony translation bundle, remove this
-      - ./PlatformTranslations:/srv/translations
+      - /path/to/home/development/pivot88/site:/srv
+      - /path/to/home/development/pivot88/developer_version_info.json:/srv/version_info.json
       #
       #  --- REQUIRED CHANGES BELOW ---
       #
       #  - VCS Access
       #  Set the first parameter to a path on your system with an SSH config and
       #  the keys to access the reopositories being used
-      - ./Users/simon/.ssh:/phpseven/.ssh
+      - /path/to/home/.ssh:/php/.ssh
 
   app_platform:
     build:
       context:       ./docker/platform_php7
-      args:
-        - USER_ID=${USER_ID}
-        - GROUP_ID=${GROUP_ID}
     image:         platform:php7
-    env_file: .env
-    build:
-      context: docker/app_platform
     volumes_from:
       - app_environment
     #
@@ -66,13 +58,7 @@ services:
     volumes:
       # Extra platform Configuration
       - ./docker/platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
-
-  database_sql:
-    volumes:
-      - ./docker/data/mysql/db:/var/lib/mysql
-      - ./docker/logs/mysql:/var/log/mysqld.log
-    ports:
-      - 3306:3306
+      - ./docker/log/platform_php7:/var/log/php7
 
   # Fake SMTP service
   mail_server:
@@ -81,11 +67,11 @@ services:
       - 82:8025
 
   # Log grabber
-  log_elk:
-     image: sebp/elk:550
-     ports:
-      - 81:80
-     volumes:
-      - ./docker/elk/logstash:/etc/logstash
-      - ./docker/elk/logstash/patterns:/opt/logstash/patterns
-      - ./docker/logs:/internal_logs
+  # log_elk:
+  #    image: sebp/elk:550
+  #    ports:
+  #     - 81:80
+  #    volumes:
+  #     - ./docker/elk/logstash:/etc/logstash
+  #     - ./docker/elk/logstash/patterns:/opt/logstash/patterns
+  #     - ./docker/log:/internal_logs

@@ -30,7 +30,6 @@ RUN apk --update add \
   php7-posix \
   php7-session \
   php7-soap \
-  php7-xdebug \
   php7-xml \
   php7-zip \
   php7-zlib \
@@ -43,6 +42,9 @@ RUN apk --update add \
   libsasl \
   nodejs \
   openssh \
+  # EXTRA DEVELOPER TOOLS
+  php7-xdebug \
+  php7-xsl \
   && ssh-keygen -A \
   && rm -rf /var/cache/apk/* \
   && ln -s /usr/bin/php7 /usr/bin/php
@@ -65,7 +67,8 @@ COPY tools/phpmd /usr/local/bin/phpmd
 COPY tools/phpunit /usr/local/bin/phpunit
 
 # Output the versions os the above utilities
-RUN pdepend --version && \
+RUN chmod a+x -R /usr/local/bin && \
+ pdepend --version && \
  phing -v && \
  phpcpd --version && \
  phpdox --version && \
@@ -79,11 +82,13 @@ RUN npm i -g gulp bower && gulp -v && bower -v
 # Prepare a user and workspace
 RUN mkdir -p /srv \
   && addgroup -g $GROUP_ID platform \
-  && adduser -D -h /srv -s /usr/bin/bash -G platform -u $USER_ID developer \
+  && adduser -D -h /home/php -s /usr/bin/bash -G platform -u $USER_ID php \
   && chmod -R 775 /srv \
-  && chown -R developer:platform /srv
+  && chown -R php:platform /srv \
+  && mkdir -p /var/log/php7 \
+  && chown -R php:platform /var/log
 
-USER developer
+USER php
 WORKDIR /srv
 
 CMD ["/bin/bash"]
