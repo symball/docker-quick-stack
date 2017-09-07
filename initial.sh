@@ -46,48 +46,6 @@ then
   exit
 fi
 
-echo "#################################################"
-echo "### Creating user environment file for docker ###"
-echo "#################################################"
 echo "USER_NAME=$(id -un)" > .env
 echo "USER_ID=$USER_ID" >> .env
 echo "GROUP_ID=$(id -g)" >> .env
-
-echo "######################################################"
-echo "### Building Docker files. This may take some time ###"
-echo "######################################################"
-
-# TODO Introduce various configs
-docker-compose build -f docker-compose.yml -f docker-compose-developer.yml
-
-echo "######################################"
-echo "### Starting up Docker environment ###"
-echo "######################################"
-docker-compose up -d -f docker-compose.yml -f docker-compose-developer.yml
-
-# Wait until docker is available
-until docker exec -t webenvironment_app_environment_1 ls -la > /dev/null 2>&1; do sleep 2; done
-
-echo "################################"
-echo "### Running Composer install ###"
-echo "################################"
-docker exec -it webenvironment_app_environment_1 composer install --no-interaction
-
-echo "######################"
-echo "### Dumping Assets ###"
-echo "######################"
-docker exec -it webenvironment_app_environment_1 php bin/console assets:install --symlink --relative
-
-echo "####################################################"
-echo "### Ready...Getting shell in app_environment container ###"
-echo "####################################################"
-echo "              --- USEFUL INFO ---"
-echo "# To get back to your parent system"
-echo "exit"
-echo "# To shutdown the environment, once you are back in your parent shell"
-echo "docker-compose stop"
-echo "# In the future, if you want to boot up the environment again"
-echo "docker-compose up"
-echo "# In the future, to get a shell in the app_environment, once Docker is up"
-echo "docker exec -it webenvironment_app_environment_1 bash"
-docker exec -it webenvironment_app_environment_1 bash

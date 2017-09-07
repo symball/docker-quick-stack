@@ -2,12 +2,12 @@ version:           '2'
 services:
 
   app_environment:
-    image: base:php7_developer
+    image: base:php5_developer
     stdin_open:    true
     tty:           true
     env_file: .env
     build:
-      context: ./docker/base_php7_developer
+      context: ./docker/base_php5_developer
       args:
         - USER_ID=${USER_ID}
         - GROUP_ID=${GROUP_ID}
@@ -24,19 +24,19 @@ services:
     #
     volumes:
       # Log location
-      - ./docker/log/dev_symfony_php7:/srv/app/logs
+      - ./docker/log/base_symfony_php7:/srv/app/logs
       # Extra platform Configuration
       - ./docker/base_php7/php.ini:/etc/php7/conf.d/overrides.ini
       # Project files
-      - /path/to/site:/srv
-      - /path/to/developer_version_info.json:/srv/version_info.json
-      - /path/to/gitlab/.ssh:/home/php/.ssh
-      # TODO Once using Symfony translation bundle, remove this
-      - /path/to/PlatformTranslations:/srv/translations
-      #  VCS Access for composer - The folder should contain:
-      #  - The private key
-      #  - An SSH config file which auto configures key usage
-      - /path/to/gitlab/.ssh:/php/.ssh
+      - /Users/simon/Development/pivot88/Pivot88WebPlatform:/srv
+      # - /Users/simon/Development/temp/Pivot88WebPlatform:/srv
+      #
+      #  --- REQUIRED CHANGES BELOW ---
+      #
+      #  - VCS Access
+      #  Set the first parameter to a path on your system with an SSH config and
+      #  the keys to access the reopositories being used
+      - /Users/simon/.ssh:/php/.ssh
 
   app_platform:
     build:
@@ -69,9 +69,9 @@ services:
     ports:
       - 8080:80
       - 4430:443
-      - 3306:3306
     volumes:
-      - ./docker/nginx/dev_config:/etc/nginx/conf.d
+      - ./docker/nginx/core_config:/etc/nginx/conf.d
+      # - ./docker/nginx/extra_config/sql.conf:/etc/nginx/conf.d/sql.conf
       - ./docker/log/nginx:/var/log/nginx
     volumes_from:
       - app_platform
@@ -81,7 +81,9 @@ services:
     volumes:
       - /Users/simon/Development/pivot88/docker/data/mysql:/var/lib/mysql
       - ./docker/log/mysql:/var/log
-    # TODO substitute with key service
+    ports:
+      - 3306:3306
+    # TODO Move in to a management system
     environment:
       - MYSQL_ROOT_PASSWORD=symfony
       - MYSQL_ROOT_HOST=%
@@ -90,9 +92,8 @@ services:
   mail_server:
     image: mailhog/mailhog
     ports:
-      - 8081:8025
+      - 82:8025
 
-  # TODO - Redo the configuration layout for new project structure
   # Log grabber
   # log_elk:
   #    image: sebp/elk:550
