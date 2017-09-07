@@ -33,7 +33,17 @@ services:
       # Extra platform Configuration
       - ./docker/base_php7/php-overrides.ini:/etc/php7/conf.d/overrides.ini
       # Project files
-      - /path/to/site:/srv
+      - /path/to/Pivot88WebPlatform:/srv
+      - /path/to/developer_version_info.json:/srv/version_info.json
+      - /path/to/gitlab/.ssh:/home/php/.ssh
+      # TODO Once using Symfony translation bundle, remove this
+      - /path/to/PlatformTranslations:/srv/translations
+      #  VCS Access for composer - The folder should contain:
+      #  - The private key
+      #  - An SSH config file which auto configures key usage
+      - /path/to/gitlab/.ssh:/php/.ssh
+
+
   #
   # DAEMON ENVIRONMENT
   #
