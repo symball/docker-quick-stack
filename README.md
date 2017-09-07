@@ -11,7 +11,7 @@ This stack doesn't require moving any project files, they should be stored separ
 
 *IMPORTANT NOTE* - If this is the first time you are using this repository, please look through the `docker-compose.yml` and `docker-compose-developer-php7.yml` files before running any of the below commands and follow the instructions included.
 
-You have the following options which act as very simple proxy commands to the docker daemon.
+You have the following options which act as very simple proxy commands to the docker daemon. Most often, you will just want to run `make dev`.
 
 - prod - Standard (minimalist) setup up and running
 - down - Make sure there are no running containers
