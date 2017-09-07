@@ -85,7 +85,7 @@ services:
       - 3306:3306
     # TODO Move in to a management system
     environment:
-      - MYSQL_ROOT_PASSWORD=symfony
+      - MYSQL_ROOT_PASSWORD=docker_stack
       - MYSQL_ROOT_HOST=%
 
   # Fake SMTP service

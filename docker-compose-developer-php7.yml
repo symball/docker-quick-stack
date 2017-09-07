@@ -29,14 +29,6 @@ services:
       - ./docker/base_php7/php.ini:/etc/php7/conf.d/overrides.ini
       # Project files
       - /path/to/site:/srv
-      - /path/to/developer_version_info.json:/srv/version_info.json
-      - /path/to/gitlab/.ssh:/home/php/.ssh
-      # TODO Once using Symfony translation bundle, remove this
-      - /path/to/PlatformTranslations:/srv/translations
-      #  VCS Access for composer - The folder should contain:
-      #  - The private key
-      #  - An SSH config file which auto configures key usage
-      - /path/to/gitlab/.ssh:/php/.ssh
 
   app_platform:
     build:
@@ -83,7 +75,7 @@ services:
       - ./docker/log/mysql:/var/log
     # TODO substitute with key service
     environment:
-      - MYSQL_ROOT_PASSWORD=symfony
+      - MYSQL_ROOT_PASSWORD=quick_stack
       - MYSQL_ROOT_HOST=%
 
   # Fake SMTP service
