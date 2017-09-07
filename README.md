@@ -5,7 +5,11 @@ This repository contains a docker definition and script that will get up and run
 - Web infrastructure in a box (NGINX, PHP, MySQL, COUCHDB, ELK)
 - A toolchain image that provides tools you will need as a developer
 
+This stack doesn't require moving any project files, they should be stored separately. I have included some of the notes from a knowledge sharing session as a short reference to Docker in general after the instructions.
+
 ## Usage
+
+*IMPORTANT NOTE* - If this is the first time you are using this repository, please look through the `docker-compose.yml` and `docker-compose-developer-php7.yml` files before running any of the below commands and follow the instructions included.
 
 You have the following options which act as very simple proxy commands to the docker daemon.
 
