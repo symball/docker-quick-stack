@@ -28,15 +28,8 @@ services:
       # Extra platform Configuration
       - ./docker/base_php7/php.ini:/etc/php7/conf.d/overrides.ini
       # Project files
-      - /path/to/Pivot88WebPlatform:/srv
-      - /path/to/developer_version_info.json:/srv/version_info.json
-      - /path/to/gitlab/.ssh:/home/php/.ssh
-      # TODO Once using Symfony translation bundle, remove this
-      - /path/to/PlatformTranslations:/srv/translations
-      #  VCS Access for composer - The folder should contain:
-      #  - The private key
-      #  - An SSH config file which auto configures key usage
-      - /path/to/gitlab/.ssh:/php/.ssh
+      - ~/Development/pivot88/Pivot88WebPlatform:/srv
+      - ~/.ssh:/home/php/.ssh
 
   app_platform:
     build:
@@ -70,8 +63,11 @@ services:
       - 8080:80
       - 4430:443
       - 3306:3306
+      - 5984:5984
     volumes:
-      - ./docker/nginx/dev_config:/etc/nginx/conf.d
+      - ./docker/nginx/dev_config/http:/etc/nginx/conf.d
+      - ./docker/nginx/dev_config/stream:/etc/nginx/conf.e
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./docker/log/nginx:/var/log/nginx
     volumes_from:
       - app_platform
@@ -79,11 +75,11 @@ services:
   database_sql:
     image:         mysql/mysql-server:5.5
     volumes:
-      - /Users/simon/Development/pivot88/docker/data/mysql:/var/lib/mysql
+      - ./docker/data/mysql:/var/lib/mysql
       - ./docker/log/mysql:/var/log
     # TODO substitute with key service
     environment:
-      - MYSQL_ROOT_PASSWORD=quick_stack
+      - MYSQL_ROOT_PASSWORD=docker_stack
       - MYSQL_ROOT_HOST=%
 
   # Fake SMTP service

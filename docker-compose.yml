@@ -33,15 +33,9 @@ services:
       # Extra platform Configuration
       - ./docker/base_php7/php-overrides.ini:/etc/php7/conf.d/overrides.ini
       # Project files
-      - /path/to/Pivot88WebPlatform:/srv
-      - /path/to/developer_version_info.json:/srv/version_info.json
-      - /path/to/gitlab/.ssh:/home/php/.ssh
-      # TODO Once using Symfony translation bundle, remove this
-      - /path/to/PlatformTranslations:/srv/translations
-      #  VCS Access for composer - The folder should contain:
-      #  - The private key
-      #  - An SSH config file which auto configures key usage
-      - /path/to/gitlab/.ssh:/php/.ssh
+      - ~/Development/pivot88/Pivot88WebPlatform:/srv
+      # SSH dir with aut configured gitlab connection
+      - ~/.ssh:/home/php/.ssh
 
 
   #
@@ -88,7 +82,9 @@ services:
       - 8080:80
       - 4430:443
     volumes:
-      - ./docker/nginx/prod_config:/etc/nginx/conf.d
+      - ./docker/nginx/prod_config/http:/etc/nginx/conf.d
+      - ./docker/nginx/prod_config/stream:/etc/nginx/conf.e
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./docker/log/nginx:/var/log/nginx
     volumes_from:
       - app_platform
