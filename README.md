@@ -7,6 +7,12 @@ This repository contains a docker definition and script that will get up and run
 
 This stack doesn't require moving any project files, they should be stored separately. I have included some of the notes from a knowledge sharing session as a short reference to Docker in general after the instructions.
 
+## TODO
+
+- [ ] Finish the PHP5 configuration
+- [ ] Configure the ELK stack to work with log directory layout  
+- [ ] Convert the `initial.sh` script in to a Phing file
+
 ## Usage
 
 *IMPORTANT NOTE* - If this is the first time you are using this repository, please look through the `docker-compose.yml` and `docker-compose-developer-php7.yml` files before running any of the below commands and follow the instructions included.
@@ -19,6 +25,11 @@ You have the following options which act as very simple proxy commands to the do
 - dev - Get a developers setup up and running. This extends the prod definition and adds extra tools to the environment container, mailhog, and ELK.
 - dev-build - Prepare images for dev environment
 - pull - Reach out to the image repositories and download any images defined. This will be run automatically if necessary.
+
+## Exposing your Services
+
+Nginx should be the only container that exposes or forwards ports on to the host for purposes of load balancing and simplified configuration. To make this easier for you, there is a folder containing a set of predefined configurations located at `./docker/nginx/config_library`.
+Configuration files should either be copied or creates symlinks to either the `dev_config` or `prod_config` folders, being sure to use the correct `http` or `stream` services folder.
 
 # Docker
 [Docker](https://www.docker.com/) is a collection of three tools:
