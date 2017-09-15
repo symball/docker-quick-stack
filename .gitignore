@@ -1,7 +1,13 @@
 .env
+**/*/.DS_STORE
 **/.directory
 .directory
-/docker/data
-/docker/log
+/data/couch/*
+/data/mysql/*
+/log/base_php7/*
+/log/base_php7_developer*
+/log/platform_php7/*
+/log/nginx/*
+/log/mysql/*
 **/*~
 *~

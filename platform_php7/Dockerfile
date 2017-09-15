@@ -47,14 +47,19 @@ RUN apk --update add \
   && rm -rf /var/cache/apk/* \
   && ln -s /usr/bin/php7 /usr/bin/php
 
+  # Generate the user group if it doesn't exist
+  COPY usergroup.sh /tmp/usergroup.sh
+  RUN sh /tmp/usergroup.sh $GROUP_ID
+
+
 # Prepare a user and workspace
 RUN mkdir -p /srv \
-  && addgroup -g $GROUP_ID platform \
   && adduser -D -h /home/phpdaemon -s /usr/bin/bash -G platform -u $USER_ID phpdaemon \
   && chmod -R 775 /srv \
   && chown -R phpdaemon:platform /srv \
   && mkdir -p /var/log/php7 \
-  && chown -R phpdaemon:platform /var/log
+  && chown -R phpdaemon:platform /var/log \
+  && chmod -R 775 /var/log/php7
 
 USER phpdaemon
 WORKDIR /srv

@@ -7,7 +7,7 @@ services:
     tty:           true
     env_file: .env
     build:
-      context: ./docker/base_php7_developer
+      context: ./base_php7_developer
       args:
         - USER_ID=${USER_ID}
         - GROUP_ID=${GROUP_ID}
@@ -24,17 +24,22 @@ services:
     #
     volumes:
       # Log location
-      - ./docker/log/dev_symfony_php7:/srv/app/logs
+      - ./log/base_php7:/srv/app/logs
       # Extra platform Configuration
-      - ./docker/base_php7/php.ini:/etc/php7/conf.d/overrides.ini
+      - ./base_php7/php.ini:/etc/php7/conf.d/overrides.ini
       # Project files
-      - ~/Development/pivot88/Pivot88WebPlatform:/srv
+      - ~/pivot88/Pivot88WebPlatform:/srv
+      - ~/pivot88/DataBundle:/srv/managed/DataBundle
       - ~/.ssh:/home/php/.ssh
 
   app_platform:
-    build:
-      context:       ./docker/platform_php7
     image:         platform:php7
+    env_file: .env
+    build:
+      context: ./platform_php7
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
     volumes_from:
       - app_environment
     #
@@ -50,8 +55,8 @@ services:
     #
     volumes:
       # Extra platform Configuration
-      - ./docker/platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
-      - ./docker/log/platform_php7:/var/log/php7
+      - ./platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
+      - ./log/platform_php7:/var/log/php7
 
   external_gateway:
     image:         nginx:mainline-alpine
@@ -63,23 +68,24 @@ services:
       - 8080:80
       - 4430:443
       - 3306:3306
-      - 5984:5984
+      # - 5984:5984
     volumes:
-      - ./docker/nginx/dev_config/http:/etc/nginx/conf.d
-      - ./docker/nginx/dev_config/stream:/etc/nginx/conf.e
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/log/nginx:/var/log/nginx
+      - ./nginx/dev_config/http:/etc/nginx/conf.d
+      - ./nginx/dev_config/stream:/etc/nginx/conf.e
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./log/nginx:/var/log/nginx
     volumes_from:
       - app_platform
 
   database_sql:
     image:         mysql/mysql-server:5.5
     volumes:
-      - ./docker/data/mysql:/var/lib/mysql
-      - ./docker/log/mysql:/var/log
+      - ./data/mysql:/var/lib/mysql
+      - ./log/mysql:/var/log
     # TODO substitute with key service
     environment:
       - MYSQL_ROOT_PASSWORD=docker_stack
+      - MYSQL_DATABASE=docker_stack
       - MYSQL_ROOT_HOST=%
 
   # Fake SMTP service
@@ -88,13 +94,47 @@ services:
     ports:
       - 8081:8025
 
-  # TODO - Redo the configuration layout for new project structure
-  # Log grabber
-  # log_elk:
-  #    image: sebp/elk:550
-  #    ports:
-  #     - 81:80
-  #    volumes:
-  #     - ./docker/elk/logstash:/etc/logstash
-  #     - ./docker/elk/logstash/patterns:/opt/logstash/patterns
-  #     - ./docker/log:/internal_logs
+  #
+  # ELK Stack
+  #
+#   elasticsearch:
+#     image: docker.elastic.co/elasticsearch/elasticsearch:5.6.0
+#     volumes:
+#       - ./elasticsearch/config:/usr/share/elasticsearch/config
+#     # ports:
+#     #   - "9200:9200"
+#     #   - "9300:9300"
+#     environment:
+#       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+#     networks:
+#       - elk
+#
+#   logstash:
+#     image: docker.elastic.co/logstash/logstash:5.6.0
+#     volumes:
+#       - ./logstash/config:/usr/share/logstash/config
+#       - ./logstash/pipeline:/usr/share/logstash/pipeline
+#     # ports:
+#     #   - "5000:5000"
+#     environment:
+#       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+#     networks:
+#       - elk
+#     depends_on:
+#       - elasticsearch
+#
+#   kibana:
+#     image: docker.elastic.co/kibana/kibana:5.6.0
+#     volumes:
+#       - ./kibana:/usr/share/kibana/config
+#     # ports:
+#     #   - "5601:5601"
+#     networks:
+#       - elk
+#     depends_on:
+#       - elasticsearch
+#
+# networks:
+#
+#   elk:
+#     driver: bridge

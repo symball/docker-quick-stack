@@ -15,7 +15,7 @@ services:
     stdin_open:    true
     tty:           true
     build:
-      context:       ./docker/base_php7
+      context:       ./base_php7
     #
     # INTERNAL NETWORKING
     #
@@ -28,12 +28,12 @@ services:
     #
     volumes:
       # Log location
-      - ./docker/log/symfony_logs:/srv/app/logs
-      - ./docker/log/base_php7:/var/log
+      - ./log/symfony_logs:/srv/app/logs
+      - ./log/base_php7:/var/log
       # Extra platform Configuration
-      - ./docker/base_php7/php-overrides.ini:/etc/php7/conf.d/overrides.ini
+      - ./base_php7/php-overrides.ini:/etc/php7/conf.d/overrides.ini
       # Project files
-      - ~/Development/pivot88/Pivot88WebPlatform:/srv
+      - ~/pivot88/Pivot88WebPlatform:/srv
       # SSH dir with aut configured gitlab connection
       - ~/.ssh:/home/php/.ssh
 
@@ -46,7 +46,7 @@ services:
   #
   app_platform:
     build:
-      context:       ./docker/platform_php7
+      context:       ./platform_php7
     image:         platform:php7
     volumes_from:
       - app_environment
@@ -62,8 +62,8 @@ services:
     #
     volumes:
       # Extra platform Configuration
-      - ./docker/platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
-      - ./docker/log/platform_php7:/var/log/php7
+      - ./platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
+      - ./log/platform_php7:/var/log/php7
   #
   # INGRESS CONTROLLER
   #
@@ -82,32 +82,32 @@ services:
       - 8080:80
       - 4430:443
     volumes:
-      - ./docker/nginx/prod_config/http:/etc/nginx/conf.d
-      - ./docker/nginx/prod_config/stream:/etc/nginx/conf.e
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/log/nginx:/var/log/nginx
+      - ./nginx/prod_config/http:/etc/nginx/conf.d
+      - ./nginx/prod_config/stream:/etc/nginx/conf.e
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./log/nginx:/var/log/nginx
     volumes_from:
       - app_platform
   #
   # INTERNAL SERVICES
   #
+  # relational database
   database_sql:
     image:         mysql/mysql-server:5.5
     volumes:
-      - ./docker/data/mysql:/var/lib/mysql
-      - ./docker/log/mysql:/var/log
+      - ./data/mysql:/var/lib/mysql
+      - ./log/mysql:/var/log
     # TODO substitute with key service
     environment:
       - MYSQL_ROOT_PASSWORD=docker_stack
       - MYSQL_ROOT_HOST=%
 
+  # document database
   database_couch:
      image:        database:couch
-     build:
-       context:       ./docker/database_couch
      volumes:
-       - ./docker/data/couch:/usr/local/var/lib/couchdb
-       - ./docker/log/couch:/var/log/couchdb
+       - ./data/couch:/usr/local/var/lib/couchdb
+       - ./log/couch:/var/log/couchdb
      # TODO substitute with key service
      environment:
       - COUCHDB_USER=docker_stack

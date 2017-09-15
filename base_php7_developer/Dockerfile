@@ -68,7 +68,6 @@ COPY tools/phpunit /usr/local/bin/phpunit
 
 # Output the versions os the above utilities
 RUN chmod a+x -R /usr/local/bin && \
- pdepend --version && \
  phing -v && \
  phpcpd --version && \
  phpdox --version && \
@@ -79,9 +78,12 @@ RUN chmod a+x -R /usr/local/bin && \
 # GulpJS task runner
 RUN npm i -g gulp bower && gulp -v && bower -v
 
+# Generate the user group if it doesn't exist
+COPY usergroup.sh /tmp/usergroup.sh
+RUN sh /tmp/usergroup.sh $GROUP_ID
+
 # Prepare a user and workspace
 RUN mkdir -p /srv \
-  && addgroup -g $GROUP_ID platform \
   && adduser -D -h /home/php -s /usr/bin/bash -G platform -u $USER_ID php \
   && chmod -R 775 /srv \
   && chown -R php:platform /srv \

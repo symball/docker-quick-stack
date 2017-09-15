@@ -2,12 +2,12 @@ version:           '2'
 services:
 
   app_environment:
-    image: base:php5_developer
+    image: base:php55_developer
     stdin_open:    true
     tty:           true
     env_file: .env
     build:
-      context: ./docker/base_php5_developer
+      context: ./base_php55_developer
       args:
         - USER_ID=${USER_ID}
         - GROUP_ID=${GROUP_ID}
@@ -24,24 +24,22 @@ services:
     #
     volumes:
       # Log location
-      - ./docker/log/base_symfony_php7:/srv/app/logs
+      - ./log/base_symfony_php7:/srv/app/logs
       # Extra platform Configuration
-      - ./docker/base_php7/php.ini:/etc/php7/conf.d/overrides.ini
+      - ./base_php7/php.ini:/etc/php7/conf.d/overrides.ini
       # Project files
-      - /path/to/Pivot88WebPlatform:/srv
-      - /path/to/developer_version_info.json:/srv/version_info.json
-      - /path/to/gitlab/.ssh:/home/php/.ssh
-      # TODO Once using Symfony translation bundle, remove this
-      - /path/to/PlatformTranslations:/srv/translations
-      #  VCS Access for composer - The folder should contain:
-      #  - The private key
-      #  - An SSH config file which auto configures key usage
-      - /path/to/gitlab/.ssh:/php/.ssh
+      - ~/Development/pivot88/Pivot88WebPlatform:/srv
+      - ~/Development/DataBundle:/srv/DataBundle
+      - ~/.ssh:/home/php/.ssh
 
   app_platform:
+    image:         platform:php55
+    env_file: .env
     build:
-      context:       ./docker/platform_php7
-    image:         platform:php7
+      context: ./platform_php55
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
     volumes_from:
       - app_environment
     #
@@ -57,8 +55,8 @@ services:
     #
     volumes:
       # Extra platform Configuration
-      - ./docker/platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
-      - ./docker/log/platform_php7:/var/log/php7
+      - ./platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
+      - ./log/platform_php7:/var/log/php7
 
   external_gateway:
     image:         nginx:mainline-alpine
@@ -70,17 +68,18 @@ services:
       - 8080:80
       - 4430:443
     volumes:
-      - ./docker/nginx/core_config:/etc/nginx/conf.d
-      # - ./docker/nginx/extra_config/sql.conf:/etc/nginx/conf.d/sql.conf
-      - ./docker/log/nginx:/var/log/nginx
+      - ./nginx/dev_config/http:/etc/nginx/conf.d
+      - ./nginx/dev_config/stream:/etc/nginx/conf.e
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./log/nginx:/var/log/nginx
     volumes_from:
       - app_platform
 
   database_sql:
     image:         mysql/mysql-server:5.5
     volumes:
-      - /Users/simon/Development/pivot88/docker/data/mysql:/var/lib/mysql
-      - ./docker/log/mysql:/var/log
+      - ./data/mysql:/var/lib/mysql
+      - ./log/mysql:/var/log
     ports:
       - 3306:3306
     # TODO Move in to a management system
@@ -100,6 +99,6 @@ services:
   #    ports:
   #     - 81:80
   #    volumes:
-  #     - ./docker/elk/logstash:/etc/logstash
-  #     - ./docker/elk/logstash/patterns:/opt/logstash/patterns
-  #     - ./docker/log:/internal_logs
+  #     - ./elk/logstash:/etc/logstash
+  #     - ./elk/logstash/patterns:/opt/logstash/patterns
+  #     - ./log:/internal_logs
