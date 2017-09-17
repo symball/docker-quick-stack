@@ -11,11 +11,9 @@ services:
   # should stash this file unless told changes are being made.
   #
   app_environment:
-    image:         base:php7
+    image:         symball/pivot88-docker:base_php7
     stdin_open:    true
     tty:           true
-    build:
-      context:       ./base_php7
     #
     # INTERNAL NETWORKING
     #
@@ -30,8 +28,6 @@ services:
       # Log location
       - ./log/symfony_logs:/srv/app/logs
       - ./log/base_php7:/var/log
-      # Extra platform Configuration
-      - ./base_php7/php-overrides.ini:/etc/php7/conf.d/overrides.ini
       # Project files
       - ~/pivot88/Pivot88WebPlatform:/srv
       # SSH dir with aut configured gitlab connection
@@ -45,9 +41,7 @@ services:
   # from the base environment
   #
   app_platform:
-    build:
-      context:       ./platform_php7
-    image:         platform:php7
+    image:         symball/pivot88-docker:platform_php7
     volumes_from:
       - app_environment
     #
@@ -61,8 +55,6 @@ services:
     # SHARED HOST VOLUMES
     #
     volumes:
-      # Extra platform Configuration
-      - ./platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
       - ./log/platform_php7:/var/log/php7
   #
   # INGRESS CONTROLLER
@@ -104,7 +96,7 @@ services:
 
   # document database
   database_couch:
-     image:        database:couch
+     image:        couchdb
      volumes:
        - ./data/couch:/usr/local/var/lib/couchdb
        - ./log/couch:/var/log/couchdb

@@ -1,0 +1,87 @@
+docker.image('symball/pivot88:jenkins_php7').inside {
+
+   stage('SSH prep') {
+
+       withCredentials([file(credentialsId: 'gitlabsshkey', variable: 'sshkey')]) {
+
+        sh 'mkdir ~/.ssh'
+
+        sh '''
+
+cat > ~/.ssh/config <<EOL
+
+Host gitlab.pivot88.com
+
+   RSAAuthentication yes
+
+   StrictHostKeyChecking no
+
+   UserKnownHostsFile=/dev/null
+
+   HostName gitlab.pivot88.com
+
+   Port 58122
+
+   User sball
+
+   IdentityFile ~/.ssh/pivot88_gitlab
+
+EOL
+
+'''
+
+       sh 'cp $sshkey ~/.ssh/pivot88_gitlab'
+
+     }
+
+   }
+
+   stage('checkout') {
+
+       sh 'git clone ssh://git@gitlab.pivot88.com:58122/symfony-bundles/translations.git bundle'
+
+       sh 'git clone ssh://git@gitlab.pivot88.com:58122/pivot88-legacy/PlatformTranslations.git translations'
+
+   }
+
+   stage('move-translations') {
+
+       // Make sure the resources directory exists, you never know
+
+       sh "mkdir -p bundle/Resources/translations"
+
+
+
+       // Copy translations from weblate to the Symfony bundle
+
+       sh "yes | cp -R ${pwd()}/translations/bundle/* ${pwd()}/bundle/Resources/translations/"
+
+   }
+
+   stage('update-bundle') {
+
+       // dir doesn't work with docker images and sh
+
+       sh '''
+
+       cd bundle && \
+
+       git add -A && \
+
+       git commit -am 'Jenkins language update' && \
+
+       git push -u origin master'''
+
+   }
+
+   stage('cleanup') {
+
+       // Remove the workspace files
+
+       deleteDir()
+
+   }
+
+   }
+
+}

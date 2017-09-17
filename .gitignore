@@ -3,6 +3,7 @@
 **/.directory
 .directory
 /data/couch/*
+/data/jenkins/*
 /data/mysql/*
 /log/base_php7/*
 /log/base_php7_developer*
