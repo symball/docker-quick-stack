@@ -16,5 +16,4 @@ dev-build :
 			docker-compose -f docker-compose.yml -f docker-compose-developer-php7.yml build --no-cache --force-rm
 
 pull :
-			docker-compose pull
 			docker-compose -f docker-compose.yml -f docker-compose-developer-php7.yml pull

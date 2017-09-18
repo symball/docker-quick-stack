@@ -1,4 +1,4 @@
-FROM symball/pivot88:platform_php7
+FROM symball/pivot88-docker:platform_php7
 MAINTAINER Simon Ball <open-source@simonball.me>
 
 ARG USER_ID=1000

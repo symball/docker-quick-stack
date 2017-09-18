@@ -2,7 +2,7 @@ version:           '2'
 services:
 
   app_environment:
-    image: base:php7_developer
+    image: symball/pivot88-docker:base_php7_developer
     stdin_open:    true
     tty:           true
     env_file: .env
@@ -33,7 +33,7 @@ services:
       - ~/.ssh:/home/php/.ssh
 
   app_platform:
-    image:         platform:php7_developer
+    image: symball/pivot88-docker:platform_php7
     env_file: .env
     build:
       context: ./platform_php7_developer
@@ -100,6 +100,12 @@ services:
   #
   jenkins:
     image: symball/jenkins-with-docker
+    env_file: .env
+    build:
+      context: ./jenkins
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
     ports:
       - 8082:8080
       - 50000:50000
