@@ -24,7 +24,8 @@ services:
     #
     volumes:
       # Log location
-      - ./log/base_php7:/srv/app/logs
+      - ./log/symfony:/srv/app/logs
+      - ./log/base:/var/log
       # Extra platform Configuration
       - ./base_php7_developer/php.ini:/etc/php7/conf.d/overrides.ini
       # Project files
@@ -56,7 +57,7 @@ services:
     volumes:
       - ./base_php7_developer/php.ini:/etc/php7/conf.d/overrides.ini
       - ./platform_php7_developer/pool_config.conf:/etc/php7/php-fpm.d/www.conf
-      - ./log/platform_php7:/var/log/php7
+      - ./log/platform:/var/log/php7
 
   external_gateway:
     image:         nginx:mainline-alpine

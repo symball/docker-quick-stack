@@ -26,8 +26,8 @@ services:
     #
     volumes:
       # Log location
-      - ./log/symfony_logs:/srv/app/logs
-      - ./log/base_php7:/var/log
+      - ./log/symfony:/srv/app/logs
+      - ./log/base:/var/log
       # Project files
       - ~/pivot88/Pivot88WebPlatform:/srv
       # SSH dir with aut configured gitlab connection

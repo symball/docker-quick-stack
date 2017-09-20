@@ -2,7 +2,7 @@ version:           '2'
 services:
 
   app_environment:
-    image: base:php55_developer
+    image: symball/pivot88-docker:base_php55_developer
     stdin_open:    true
     tty:           true
     env_file: .env
@@ -24,19 +24,20 @@ services:
     #
     volumes:
       # Log location
-      - ./log/base_symfony_php7:/srv/app/logs
+      - ./log/symfony:/srv/app/logs
+      - ./log/base:/var/log
       # Extra platform Configuration
-      - ./base_php7/php.ini:/etc/php7/conf.d/overrides.ini
+      - ./base_php55_developer/php.ini:/etc/php5/cli/conf.d/overrides.ini
       # Project files
-      - ~/Development/pivot88/Pivot88WebPlatform:/srv
-      - ~/Development/DataBundle:/srv/DataBundle
+      - ~/pivot88/Pivot88WebPlatform:/srv
+      - ~/pivot88/DataBundle:/srv/DataBundle
       - ~/.ssh:/home/php/.ssh
 
   app_platform:
-    image:         platform:php55
+    image: symball/pivot88-docker:platform_php55
     env_file: .env
     build:
-      context: ./platform_php55
+      context: ./platform_php55_developer
       args:
         - USER_ID=${USER_ID}
         - GROUP_ID=${GROUP_ID}
@@ -55,8 +56,8 @@ services:
     #
     volumes:
       # Extra platform Configuration
-      - ./platform_php7/pool_config.conf:/etc/php7/php-fpm.d/www.conf
-      - ./log/platform_php7:/var/log/php7
+      - ./platform_php55_developer/pool_config.conf:/etc/php5/fpm/pool.d/www.conf
+      - ./log/platform:/var/log/php5
 
   external_gateway:
     image:         nginx:mainline-alpine
@@ -92,6 +93,24 @@ services:
     image: mailhog/mailhog
     ports:
       - 82:8025
+
+  #
+  # JENKINS AUTOMATION
+  #
+  jenkins:
+    image: symball/jenkins-with-docker
+    env_file: .env
+    build:
+      context: ./jenkins
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
+    ports:
+      - 8082:8080
+      - 50000:50000
+    volumes:
+      - ./data/jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
 
   # Log grabber
   # log_elk:

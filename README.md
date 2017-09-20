@@ -17,13 +17,17 @@ This stack doesn't require moving any project files, they should be stored separ
 
 *IMPORTANT NOTE* - If this is the first time you are using this repository, please look through the `docker-compose.yml` and `docker-compose-developer-php7.yml` files before running any of the below commands and follow the instructions included.
 
-You have the following options which act as very simple proxy commands to the docker daemon. Most often, you will just want to run `make dev`.
+You have the following options which act as very simple proxy commands to the docker daemon. Most often, you will just want to run `make dev` or `make legacy`.
 
-- prod - Standard (minimalist) setup up and running
+- prod - Standard (minimalist) setup up and running using the equivalent of what we run in production
 - down - Make sure there are no running containers
 - build - Prepare the images for the standard setup. This will be run automatically if needed when using prod alone.
 - dev - Get a developers setup up and running. This extends the prod definition and adds extra tools to the environment container, mailhog, and ELK.
+- dev-build - Wipe and rebuild
 - dev-build - Prepare images for dev environment
+- legacy - for the moment, same as the prod layout
+- legacy-build - wipe and rebuild
+- legacy-pull - Retrieve the latest images from Docker hub
 - pull - Reach out to the image repositories and download any images defined. This will be run automatically if necessary.
 
 ## Exposing your Services

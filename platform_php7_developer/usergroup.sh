@@ -1,7 +1,6 @@
 #!/bin/bash
 
 GROUP_ID=$1
-cat /etc/group
 if grep -q "^:$GROUP_ID:" /etc/group
     then
          echo "group exits"
