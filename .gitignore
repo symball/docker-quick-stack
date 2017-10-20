@@ -5,10 +5,13 @@
 /data/couch/*
 /data/jenkins/*
 /data/mysql/*
-/log/base_php7/*
-/log/base_php7_developer*
-/log/platform_php7/*
+/log/base/*
+/log/couch/*
+/log/jenkins/*
+/log/mysql/*
 /log/nginx/*
+/log/platform/*
+/log/symfony/*
 /log/mysql/*
 **/*~
 *~

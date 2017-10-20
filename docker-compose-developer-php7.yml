@@ -19,6 +19,8 @@ services:
       - database_couch
       - message_rabbitmq
       - mail_server
+    mem_limit: 1000000000
+    memswap_limit: 2000000000
     #
     # SHARED HOST VOLUMES
     #
@@ -30,6 +32,7 @@ services:
       - ./base_php7_developer/php.ini:/etc/php7/conf.d/overrides.ini
       # Project files
       - ~/pivot88/Pivot88WebPlatform:/srv
+      - ~/pivot88/HTML5WebReports:/srv/web/custom/reports
       - ~/pivot88/DataBundle:/srv/managed/DataBundle
       - ~/.ssh:/home/php/.ssh
 
@@ -65,7 +68,6 @@ services:
       - app_platform
       - database_couch
       - database_sql
-      - jenkins
     ports:
       - 8080:80
       - 4430:443
@@ -80,14 +82,16 @@ services:
       - app_platform
 
   database_sql:
-    image:         mysql/mysql-server:5.5
+    image:         mariadb:10
     volumes:
       - ./data/mysql:/var/lib/mysql
       - ./log/mysql:/var/log
     # TODO substitute with key service
     environment:
       - MYSQL_ROOT_PASSWORD=docker_stack
-      - MYSQL_DATABASE=docker_stack
+      - MYSQL_USER=pivot88
+      - MYSQL_PASSWORD=pivot88
+      - MYSQL_DATABASE=pivot88
       - MYSQL_ROOT_HOST=%
 
   # Fake SMTP service
@@ -99,20 +103,20 @@ services:
   #
   # JENKINS AUTOMATION
   #
-  jenkins:
-    image: symball/jenkins-with-docker
-    env_file: .env
-    build:
-      context: ./jenkins
-      args:
-        - USER_ID=${USER_ID}
-        - GROUP_ID=${GROUP_ID}
-    ports:
-      - 8082:8080
-      - 50000:50000
-    volumes:
-      - ./data/jenkins:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
+  # jenkins:
+  #   image: symball/jenkins-with-docker
+  #   env_file: .env
+  #   build:
+  #     context: ./jenkins
+  #     args:
+  #       - USER_ID=${USER_ID}
+  #       - GROUP_ID=${GROUP_ID}
+  #   ports:
+  #     - 8082:8080
+  #     - 50000:50000
+  #   volumes:
+  #     - ./data/jenkins:/var/jenkins_home
+  #     - /var/run/docker.sock:/var/run/docker.sock
   # ELK Stack
   #
 #   elasticsearch:

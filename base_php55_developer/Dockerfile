@@ -18,6 +18,10 @@ RUN mkdir -p /srv && mkdir -p /var/log \
   && chown -R php:platform /var/log
 
 USER php
+
+# Install composer plugin for parallel downloads
+RUN composer global require hirak/prestissimo
+
 WORKDIR /srv
 
 CMD ["/bin/bash"]

@@ -30,7 +30,8 @@ services:
       - ./base_php55_developer/php.ini:/etc/php5/cli/conf.d/overrides.ini
       # Project files
       - ~/pivot88/Pivot88WebPlatform:/srv
-      - ~/pivot88/DataBundle:/srv/DataBundle
+      - ~/pivot88/HTML5WebReports:/srv/reports
+      - ~/pivot88/DataBundle:/srv/managed/DataBundle
       - ~/.ssh:/home/php/.ssh
 
   app_platform:

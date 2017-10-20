@@ -20,6 +20,10 @@ RUN mkdir -p /srv \
   && chmod -R 775 /var/log/php7
 
 USER php
+
+# Install composer plugin for parallel downloads
+RUN composer global require hirak/prestissimo
+
 WORKDIR /srv
 
 CMD ["/bin/bash"]

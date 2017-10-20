@@ -85,13 +85,16 @@ services:
   #
   # relational database
   database_sql:
-    image:         mysql/mysql-server:5.5
+    image:         mariadb:10
     volumes:
       - ./data/mysql:/var/lib/mysql
       - ./log/mysql:/var/log
     # TODO substitute with key service
     environment:
       - MYSQL_ROOT_PASSWORD=docker_stack
+      - MYSQL_USER=pivot88
+      - MYSQL_PASSWORD=pivot88
+      - MYSQL_DATABASE=pivot88
       - MYSQL_ROOT_HOST=%
 
   # document database

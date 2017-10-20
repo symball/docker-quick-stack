@@ -30,6 +30,14 @@ if exists docker-compose
   exit
 fi
 
+# on Mac, primary group on mac will already be in use
+if [[ "$OSTYPE" == "darwin17" ]]; then
+  echo "recognise using a mac"
+   GROUP_ID=$(python -c 'import grp; print grp.getgrnam("shared_volume").gr_gid')
+else
+   GROUP_ID=$(id -g)
+fi
+
 # Try and get the user ID
 USER_ID=$UID
 id_command='id -u'
@@ -48,4 +56,4 @@ fi
 
 echo "USER_NAME=$(id -un)" > .env
 echo "USER_ID=$USER_ID" >> .env
-echo "GROUP_ID=$(id -g)" >> .env
+echo "GROUP_ID=$GROUP_ID" >> .env
