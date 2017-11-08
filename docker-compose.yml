@@ -11,27 +11,25 @@ services:
   # should stash this file unless told changes are being made.
   #
   app_environment:
-    image:         symball/pivot88-docker:base_php7
+    image:         symball/docker-images:base_php7
     stdin_open:    true
     tty:           true
     #
     # INTERNAL NETWORKING
     #
     links:
-      - database_sql
-      - database_couch
-      - message_rabbitmq
+       - database_sql
+       - database_couch
+       - message_rabbitmq
     #
     # SHARED HOST VOLUMES
     #
     volumes:
       # Log location
-      - ./log/symfony:/srv/app/logs
-      - ./log/base:/var/log
+      - ./log/app_specific:/srv/app/logs
+      - ./log/app_environment:/var/log
       # Project files
-      - ~/pivot88/Pivot88WebPlatform:/srv
-      # SSH dir with aut configured gitlab connection
-      - ~/.ssh:/home/php/.ssh
+      - ./site:/srv
 
 
   #
@@ -41,7 +39,7 @@ services:
   # from the base environment
   #
   app_platform:
-    image:         symball/pivot88-docker:platform_php7
+    image:         symball/docker-images:platform_php7
     volumes_from:
       - app_environment
     #
@@ -55,7 +53,7 @@ services:
     # SHARED HOST VOLUMES
     #
     volumes:
-      - ./log/platform_php7:/var/log/php7
+      - ./log/app_platform:/var/log/php7
   #
   # INGRESS CONTROLLER
   #
@@ -71,13 +69,13 @@ services:
       - database_couch
       - database_sql
     ports:
-      - 8080:80
-      - 4430:443
+      - 80:80
+      - 443:443
     volumes:
       - ./nginx/prod_config/http:/etc/nginx/conf.d
       - ./nginx/prod_config/stream:/etc/nginx/conf.e
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./log/nginx:/var/log/nginx
+      - ./log/external_gateway:/var/log/nginx
     volumes_from:
       - app_platform
   #
@@ -88,13 +86,10 @@ services:
     image:         mariadb:10
     volumes:
       - ./data/mysql:/var/lib/mysql
-      - ./log/mysql:/var/log
+      - ./log/database_mysql:/var/log
     # TODO substitute with key service
     environment:
       - MYSQL_ROOT_PASSWORD=docker_stack
-      - MYSQL_USER=pivot88
-      - MYSQL_PASSWORD=pivot88
-      - MYSQL_DATABASE=pivot88
       - MYSQL_ROOT_HOST=%
 
   # document database
@@ -102,7 +97,7 @@ services:
      image:        couchdb
      volumes:
        - ./data/couch:/usr/local/var/lib/couchdb
-       - ./log/couch:/var/log/couchdb
+       - ./log/database_couch:/var/log/couchdb
      # TODO substitute with key service
      environment:
       - COUCHDB_USER=docker_stack

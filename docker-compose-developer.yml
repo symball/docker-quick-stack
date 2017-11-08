@@ -1,0 +1,98 @@
+version:           '2'
+services:
+
+  app_environment:
+    image: symball/docker-images:base_php7_developer
+    stdin_open:    true
+    tty:           true
+    env_file: .env
+    build:
+      context: ./base_php7_developer
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
+    #
+    # INTERNAL NETWORKING
+    #
+    links:
+      - database_sql
+      - database_couch
+      - message_rabbitmq
+      - mail_server
+    mem_limit: 1000000000
+    memswap_limit: 2000000000
+    #
+    # SHARED HOST VOLUMES
+    #
+    volumes:
+      # Log location
+      - ./log/app_specific:/srv/app/logs
+      - ./log/app_environment:/var/log
+      # Extra platform Configuration
+      - ./base_php7_developer/php.ini:/etc/php7/conf.d/overrides.ini
+      # Project files
+      - ./site:/srv
+
+  app_platform:
+    image: symball/docker-images:platform_php7
+    env_file: .env
+    build:
+      context: ./platform_php7_developer
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
+    volumes_from:
+      - app_environment
+    #
+    # INTERNAL NETWORKING
+    #
+    links:
+      - database_sql
+      - database_couch
+      - message_rabbitmq
+      - mail_server
+    #
+    # SHARED HOST VOLUMES
+    #
+    volumes:
+      - ./base_php7_developer/php.ini:/etc/php7/conf.d/overrides.ini
+      - ./platform_php7_developer/pool_config.conf:/etc/php7/php-fpm.d/www.conf
+      - ./log/app_platform:/var/log/php7
+
+  external_gateway:
+    image:         nginx:mainline-alpine
+    links:
+      - app_platform
+      - database_couch
+      - database_sql
+    ports:
+      - 8080:80
+      - 4430:443
+      - 3306:3306
+      # - 5984:5984
+    volumes:
+      - ./nginx/dev_config/http:/etc/nginx/conf.d
+      - ./nginx/dev_config/stream:/etc/nginx/conf.e
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./log/external_gateway:/var/log/nginx
+    volumes_from:
+      - app_platform
+
+  database_sql:
+    image:         mariadb:10
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./log/database_mysql:/var/log
+    # TODO substitute with key service
+    environment:
+      - MYSQL_ROOT_PASSWORD=docker_stack
+      - MYSQL_USER=docker_stack
+      - MYSQL_PASSWORD=docker_stack
+      - MYSQL_DATABASE=docker_stack
+      - MYSQL_ROOT_HOST=%
+
+  # Fake SMTP service
+  mail_server:
+    image: mailhog/mailhog
+    ports:
+      - 8081:8025

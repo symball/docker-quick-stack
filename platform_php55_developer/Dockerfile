@@ -1,4 +1,4 @@
-FROM symball/pivot88-docker:platform_php55
+FROM symball/docker-images:platform_php55
 MAINTAINER Simon Ball <open-source@simonball.me>
 
 ARG USER_ID=1000

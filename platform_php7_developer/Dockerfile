@@ -1,4 +1,4 @@
-FROM symball/pivot88-docker:platform_php7
+FROM symball/docker-images:platform_php7
 MAINTAINER Simon Ball <open-source@simonball.me>
 
 ARG USER_ID=1000
@@ -6,13 +6,16 @@ ARG GROUP_ID=1000
 
 USER root
 
-# Generate the user group if it doesn't exist
-COPY usergroup.sh /tmp/usergroup.sh
-RUN sh /tmp/usergroup.sh $GROUP_ID
+RUN apk --update add shadow
 
-# Prepare a user and workspace
+COPY usergroup.sh /usr/local/bin/usergroupmatch
+RUN chmod a+x -R /usr/local/bin
+
+# Generate the user group if it doesn't exist
+RUN usergroupmatch $USER_ID $GROUP_ID
+
+# Prepare a workspace
 RUN mkdir -p /srv \
-  && adduser -D -h /home/php -s /usr/bin/bash -G platform -u $USER_ID php \
   && chmod -R 775 /srv \
   && chown -R php:platform /srv \
   && mkdir -p /var/log/php7 \
