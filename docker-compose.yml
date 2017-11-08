@@ -69,8 +69,8 @@ services:
       - database_couch
       - database_sql
     ports:
-      - 80:80
-      - 443:443
+      - 8080:80
+      - 4430:443
     volumes:
       - ./nginx/prod_config/http:/etc/nginx/conf.d
       - ./nginx/prod_config/stream:/etc/nginx/conf.e

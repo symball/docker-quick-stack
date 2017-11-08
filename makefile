@@ -2,7 +2,7 @@ prod :
 			docker-compose up -d
 
 down :
-			docker-compose -f docker-compose.yml -f docker-compose.developer.yml down
+			docker-compose -f docker-compose.yml -f docker-compose-developer.yml down
 
 build :
 			docker-compose build
