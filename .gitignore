@@ -12,5 +12,15 @@
 /log/database_couch/*
 /log/database_mysql/*
 /log/database_mongo/*
+!/data/couch/.keep
+!/data/jenkins/.keep
+!/data/mysql/.keep
+!/log/app_environment/.keep
+!/log/app_specific/.keep
+!/log/app_platform/.keep
+!/log/external_gateway/.keep
+!/log/database_couch/.keep
+!/log/database_mysql/.keep
+!/log/database_mongo/.keep
 **/*~
 *~
