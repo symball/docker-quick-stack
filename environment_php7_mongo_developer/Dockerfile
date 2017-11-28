@@ -1,4 +1,4 @@
-FROM symball/docker-images:base_mongo_php7_developer
+FROM symball/docker-images:environment_php7_mongo_developer
 MAINTAINER Simon Ball <open-source@simonball.me>
 
 ARG USER_ID=1000

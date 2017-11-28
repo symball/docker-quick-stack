@@ -4,6 +4,7 @@
 .directory
 /data/couch/*
 /data/jenkins/*
+/data/mongo/*
 /data/mysql/*
 /log/app_environment/*
 /log/app_specific/*
@@ -14,6 +15,7 @@
 /log/database_mongo/*
 !/data/couch/.keep
 !/data/jenkins/.keep
+!/data/mongo/.keep
 !/data/mysql/.keep
 !/log/app_environment/.keep
 !/log/app_specific/.keep
