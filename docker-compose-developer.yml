@@ -1,25 +1,25 @@
 version:           '2'
 services:
-  #
-  # BASE ENVIRONMENT
-  #
-  # Define the smallest building blocks to handle intercommunication with
-  # every component with a shell environment and provide a volume layout For
-  # project development
-  #
-  # For the developer, once you have a configuration setup the way you want, you
-  # should stash this file unless told changes are being made.
-  #
+
   app_environment:
-    image:         symball/docker-images:environment_php7_mongo
+    image: symball/docker-images:environment_php7_mongo_developer
     stdin_open:    true
     tty:           true
+    env_file: .env
+    build:
+      context: ./environment_php7_mongo_developer
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
     #
     # INTERNAL NETWORKING
     #
     links:
-       - database_mongo
-       # - database_sql
+      - database_mongo
+      # - database_sql
+      - mail_server
+    mem_limit: 1000000000
+    memswap_limit: 2000000000
     #
     # SHARED HOST VOLUMES
     #
@@ -27,18 +27,19 @@ services:
       # Log location
       - ./log/app_specific:/srv/app/logs
       - ./log/app_environment:/var/log
+      # Extra platform Configuration
+      - ./environment_php7_mongo_developer/php.ini:/etc/php7/conf.d/overrides.ini
       # Project files
       - ../site:/srv
 
-
-  #
-  # DAEMON ENVIRONMENT
-  #
-  # A version of the base image running in an automated fashion. Inherits volumes
-  # from the base environment
-  #
   app_platform:
-    image:         symball/docker-images:platform_php7_mongo
+    image: symball/docker-images:platform_php7_mongo_developer
+    env_file: .env
+    build:
+      context: ./platform_php7_mongo_developer
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
     volumes_from:
       - app_environment
     #
@@ -47,33 +48,28 @@ services:
     links:
       - database_mongo
       # - database_sql
+      - mail_server
     #
     # SHARED HOST VOLUMES
     #
     volumes:
+      - ./platform_php7_mongo_developer/php-fpm.conf:/etc/php7/php-fpm.conf
+      - ./platform_php7_mongo_developer/pool_config.conf:/etc/php7/php-fpm.d/www.conf
       - ./log/app_platform:/var/log/php7
-  #
-  # INGRESS CONTROLLER
-  #
-  # A gateway container for providing a single point of communication with
-  # external services. For any See the docker/nginx/config_library path for
-  # possible configs that should be dropped in to either the developer_config
-  # or production_config folders.
-  #
+
   external_gateway:
     image:         nginx:mainline-alpine
     links:
       - app_platform
-    ports:
-      - 80:80
-      - 443:443
+      - database_mongo
     volumes:
-      - ./nginx/prod_config/http:/etc/nginx/conf.d
-      - ./nginx/prod_config/stream:/etc/nginx/conf.e
+      - ./nginx/dev_config/http:/etc/nginx/conf.d
+      - ./nginx/dev_config/stream:/etc/nginx/conf.e
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./log/external_gateway:/var/log/nginx
     volumes_from:
       - app_platform
+
   #
   # INTERNAL SERVICES
   #
@@ -97,3 +93,9 @@ services:
   #      - MYSQL_PASSWORD=docker_stack
   #      - MYSQL_DATABASE=docker_stack
   #      - MYSQL_ROOT_HOST=%
+  
+  # Fake SMTP service
+  mail_server:
+    image: mailhog/mailhog
+    ports:
+      - 8081:8025
