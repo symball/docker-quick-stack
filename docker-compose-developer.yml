@@ -2,7 +2,7 @@ version:           '2'
 services:
 
   app_environment:
-    image: symball/docker-images:environment_php7_mongo_developer
+    container_name: dockerquickstack_environment_php7_mongo_developer
     stdin_open:    true
     tty:           true
     env_file: .env
@@ -18,8 +18,6 @@ services:
       - database_mongo
       # - database_sql
       - mail_server
-    mem_limit: 1000000000
-    memswap_limit: 2000000000
     #
     # SHARED HOST VOLUMES
     #
@@ -33,7 +31,7 @@ services:
       - ../site:/srv
 
   app_platform:
-    image: symball/docker-images:platform_php7_mongo_developer
+    container_name: dockerquickstack_platform_php7_mongo_developer
     env_file: .env
     build:
       context: ./platform_php7_mongo_developer
@@ -58,7 +56,15 @@ services:
       - ./log/app_platform:/var/log/php7
 
   external_gateway:
-    image:         nginx:mainline-alpine
+    container_name: dockerquickstack_external_gateway_developer
+    env_file: .env
+    build:
+      context: ./nginx
+      args:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
+    ports:
+      - 8080:8080
     links:
       - app_platform
       - database_mongo
@@ -93,7 +99,7 @@ services:
   #      - MYSQL_PASSWORD=docker_stack
   #      - MYSQL_DATABASE=docker_stack
   #      - MYSQL_ROOT_HOST=%
-  
+
   # Fake SMTP service
   mail_server:
     image: mailhog/mailhog
